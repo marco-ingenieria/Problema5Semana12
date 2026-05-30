@@ -99,7 +99,7 @@ def construir_indices(ruta):
             indice_por_dni[dni] = indice
 
             indice_por_apellido[apellido] = indice_por_apellido.get(apellido, [])
-            indice_por_apellido.append(indice)
+            indice_por_apellido[apellido].append(indice)
         f.close()
 
     return indice_por_dni, indice_por_apellido
@@ -211,7 +211,17 @@ def _fusionar(izq, der):
 
 #f
 """
-Justificación:
+Justificación: La estabilidad de un algoritmo de ordenamiento garantiza que si dos elementos tienen
+la misma clave de ordenación, conservarán el mismo orden relativo original. Para resolver el criterio
+de prioridad que te dice de agrupar por prioridad del 1 al 3 y, en si tienen la misma prioridad
+ordenar por apellido, se usa una estrategia de dos pasadas consecutivas: En la primer pasada se
+ordena la lista completa alfabéticamente por apellido y en la segunda pasada se vuelve a ordenar la
+lista pero esta vez por el nivel de prioridad. Si el segundo ordenamiento no fuera estable entonces
+cuando se ordena por prioridad se perderia el orden alfabetico que se genero el la primera pasada
+cuando se ordeno por apellido entonces no cumpliria con su funcion de ordenar por proridad y
+apellido y solo simplemente ordenaria por prioridad haciendo que todos los que tengan la misma
+prioridad esten juntos pero no de forma ordenada (alfabeticamente) sino que esten mezclados sin
+un orden entre ellos.
 """
 
 
@@ -236,3 +246,62 @@ def prueba_asignar_agenda():
 #i
 
 #3. Epílogo
+
+
+#4 Test
+if __name__ == '__main__':
+    print("Evaluación - Módulo 3")
+
+    # 1.Prólogo: Definir un archivo de prueba y datos desordenados
+    RUTA_TEST = "pacientes_test.dat"
+
+    datos_prueba = [
+        (40000000, "Pérez", "Juan", "11223344", 2),
+        (20000000, "Alvarez", "Anahí", "55667788", 1),
+        (30000000, "Gonzales", "María", "99001122", 1),
+        (10000000, "Blanco", "Carlos", "33445566", 3),
+        (50000000, "Alvarez", "Bruno", "44556677", 2)
+    ]
+
+    print("Creando archivo de prueba")
+    crear_archivo_pacientes(RUTA_TEST, datos_prueba)
+
+    try:
+        #Evaluación del criterio apellido
+        print("\nEvaluando criterio apellido")
+
+        resultado_modulo_apellido = listar_pacientes_ordenados(RUTA_TEST, "apellido")
+
+        resultado_esperado_apellido = sorted(datos_prueba, key=lambda p: p[1].lower())
+
+        # Validación algorítmica
+        for i in range(len(resultado_modulo_apellido)):
+            assert resultado_modulo_apellido[i][0] == resultado_esperado_apellido[i][0]
+
+        print("El criterio 'apellido' coincide exactamente con sorted().")
+
+        # Evaluación del criterio prioridad
+        print("\nEvaluando criterio prioridad")
+
+        resultado_modulo_prioridad = listar_pacientes_ordenados(RUTA_TEST, "prioridad")
+
+        resultado_esperado_prioridad = sorted(
+            datos_prueba,
+            key=lambda p: (p[4], p[1].lower())
+        )
+
+        # Validación algorítmica
+        for i in range(len(resultado_modulo_prioridad)):
+            assert resultado_modulo_prioridad[i][0] == resultado_esperado_prioridad[i][0]
+        print("El criterio prioridad coincide exactamente con sorted().")
+        print("\nTodas las pruebas del modulo 3 pasaron correctamente.")
+
+    except AssertionError:
+        #Si en algun punto no son iguales el sorted y el ordenamiento hecho entonces imprime esto
+        print("\nEl orden obtenido no es igual al de sorted().")
+
+    finally:
+        # Limpieza del archivo temporal en el disco
+        if os.path.exists(RUTA_TEST):
+            os.remove(RUTA_TEST)
+            print("\nArchivo de prueba borrado con éxito.")
