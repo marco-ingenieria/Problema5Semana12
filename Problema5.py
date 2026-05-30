@@ -18,31 +18,109 @@ ruta = os.path.join(os.path.dirname(__file__), 'pacientes.dat')
 
 #MÓDULO 1
 #a
-def empaquetar_paciente():
-    pass
+def empaquetar_paciente(dni, apellido, nombre, telefono, prioridad):
+    """
+    Empaqueta los datos de un paciente en formato binario
+    Precondición: dni es un entero, apellido, nombre y telefono son strings, prioridad es un entero de 1 a 3
+    Postcondición: paciente_pack es un paquete de bytes para ser escritos en un archivo binario
+    """
+    #truncado de cadenas largas
+    apellido = apellido[0:30]
+    nombre = nombre[0:24]
+    telefono = telefono[0:16]
 
-def desempaquetar_paciente():
-    pass
+    #codificación UTF-8
+    apellido_utf8 = apellido.encode('utf-8')
+    nombre_utf8 = nombre.encode('utf-8')
+    telefono_utf8 = telefono.encode('utf-8')
+
+    paciente_pack = struct.pack(FORMATO, dni, apellido_utf8, nombre_utf8, telefono_utf8, prioridad)
+    return paciente_pack
+
+def desempaquetar_paciente(paciente):
+    """
+    Desempaqueta un bloque de bytes correspondiente a un paciente y devuelve sus datos
+    Precondición: paciente es un paquete de bytes provenientes de un archivo binario
+    Postcondición: dni es un entero, apellido, nombre y telefono son strings, prioridad es un entero de 1 a 3 y se devuelven como tupla
+    """
+    dni, apellido, nombre, telefono, prioridad = struct.unpack(FORMATO, paciente)
+
+    #decodificación y removido de ceros de relleno
+    apellido_utf8 = apellido.rstrip(b'\x00').decode('utf-8')
+    nombre_utf8 = nombre.rstrip(b'\x00').decode('utf-8')
+    telefono_utf8 = telefono.rstrip(b'\x00').decode('utf-8')
+
+    #retornamos como tupla en vez de lista porque el paciente es una unidad y no necesitamos mutabilidad
+    return (dni, apellido_utf8, nombre_utf8, telefono_utf8, prioridad)
 
 #b
 def crear_archivo_pacientes(ruta, lista_pacientes):
-    pass
+    """
+    Crea un archivo binario con una lista de pacientes
+    Precondición: ruta es un string representando un directorio válido, lista paciente es una tupla de forma dni, apellido, nombre, telefono, prioridad
+    Efecto secundario: se crea un archivo binario con un listado de pacientes en la ruta especificada
+    """
+    with open(ruta, 'wb') as f:
+        for paciente in lista_pacientes:
+            dni, apellido, nombre, telefono, prioridad = paciente
+            f.write(empaquetar_paciente(dni, apellido, nombre, telefono, prioridad))
+        f.close()
 
 def leer_paciente(archivo, k):
-    pass
+    """
+    Lee la información de un paciente según su posición en el archivo binario
+    Precondición: archivo es un handle de archivo, k es un entero positivo
+    Postcondición: paciente es un paquete de bytes con los datos del paciente a leer
+    """
+    archivo.seek(k * TAM_REGISTRO)
+    paciente = archivo.read(TAM_REGISTRO)
+
+    return paciente
 
 
 
 #MÓDULO 2
 #c
 def construir_indices(ruta):
+    """
+    Crea índices para los pacientes del archivo binario, uno según sus nombres y otro según sus DNI
+    Precondición: ruta es un string representando un directorio válido
+    Postcondición: indice_por_dni es un diccionario con items de la forma {clave: DNI, valor: posición k del registro en el archivo}
+                   indice_por_apellido es un diccionario con items de la forma {clave: apellido, valor: lista de posiciones}
+    """
     indice_por_dni = {}
-
     indice_por_apellido = {}
+    with open(ruta, 'rb') as f:
+        for indice, paciente_pack in enumerate(leer_archivo_pacientes(f)):
+            paciente = desempaquetar_paciente(paciente_pack)
+            dni = paciente[0]
+            apellido = paciente[1]
+
+            indice_por_dni[dni] = indice
+
+            indice_por_apellido[apellido] = indice_por_apellido.get(apellido, [])
+            indice_por_apellido.append(indice)
+        f.close()
+
+    return indice_por_dni, indice_por_apellido
+
+def leer_archivo_pacientes(archivo):
+    """
+    Devuelve cada paciente del archivo binario
+    Precondición: archivo es un handle de archivo
+    Postcondición: se devuelve un generador que itera sobre los registros de pacientes del archivo (sin desempaquetar)
+    """
+    i = 0
+    paciente_pack = leer_paciente(archivo, i)
+    while paciente_pack:
+        yield paciente_pack
+        i += 1
+        paciente_pack = leer_paciente(archivo, i)
 
 #d
 def buscar_por_dni(archivo, indice_por_dni, dni):
-    pass
+    paciente_pack = leer_paciente(archivo, indice_por_dni[dni])
+    return desempaquetar_paciente(paciente_pack)
 
 
 #MÓDULO 3
