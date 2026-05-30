@@ -354,11 +354,73 @@ prueba_asignar_agenda()
 #
 
 #1. Prólogo
+ruta_pacientes = os.path.join(os.path.dirname(__file__), 'pacientes_integracion.dat')
+franjas = [9.0, 10.0, 11.0, 12.0, 13.0]
+
+# Definición de pacientes para la integración (DNI, Apellido, Nombre, Teléfono, Prioridad)
+pacientes_iniciales = [
+    (12345678, "Perez", "Juan", "11223344", 2),
+    (23456789, "Gomez", "Maria", "22334455", 1),
+    (34567890, "Rodriguez", "Pedro", "33445566", 3),
+    (45678901, "Lopez", "Ana", "44556677", 1),
+    (56789012, "Martinez", "Carlos", "55667788", 2)
+]
+
+disponibilidad = {
+    12345678: [9.0, 10.0],
+    23456789: [10.0, 11.0],
+    34567890: [11.0, 12.0],
+    45678901: [9.0, 11.0],
+    56789012: [12.0, 13.0]
+}
 
 #2. Resolución
 #i
+# Guardamos los pacientes en el archivo binario
+crear_archivo_pacientes(ruta_pacientes, pacientes_iniciales)
+
+# Construimos los índices sobre el archivo binario (Módulo 2)
+indice_por_dni, indice_por_apellido = construir_indices(ruta_pacientes)
+
+# Obtenemos la lista de pacientes ordenada por prioridad y apellido (Módulo 3)
+pacientes_ordenados_tuplas = listar_pacientes_ordenados(ruta_pacientes, "prioridad")
+
+# Convertimos las tuplas de pacientes al formato de diccionario requerido por el Módulo 4
+pacientes_del_dia = []
+for p in pacientes_ordenados_tuplas:
+    pacientes_del_dia.append({
+        'dni': p[0],
+        'apellido': p[1],
+        'nombre': p[2],
+        'telefono': p[3],
+        'prioridad': p[4]
+    })
+
+# Asignamos la agenda utilizando backtracking (Módulo 4)
+agenda_asignada = asignar_agenda(pacientes_del_dia, franjas, disponibilidad)
 
 #3. Epílogo
+print("\n=== Agenda del Día ===")
+if agenda_asignada:
+    print(f"Se logró asignar una agenda compatible para los {len(pacientes_del_dia)} pacientes:")
+    # Para mostrar la agenda ordenada por franja horaria
+    franjas_ordenadas = sorted(agenda_asignada.keys())
+    
+    # Abrimos el archivo para buscar los datos completos de los pacientes usando el índice
+    with open(ruta_pacientes, 'rb') as f:
+        for franja in franjas_ordenadas:
+            dni_paciente = agenda_asignada[franja]
+            # Buscamos el paciente por DNI directamente en el archivo binario usando el índice (Módulo 2)
+            paciente = buscar_por_dni(f, indice_por_dni, dni_paciente)
+            dni, apellido, nombre, telefono, prioridad = paciente
+            print(f"  Horario {franja:4.1f} hs -> Paciente: {apellido}, {nombre} (DNI: {dni}, Prioridad: {prioridad})")
+else:
+    print("No se encontró una asignación de agenda compatible con la disponibilidad de los pacientes.")
+
+# Limpieza del archivo de pacientes de integración
+if os.path.exists(ruta_pacientes):
+    os.remove(ruta_pacientes)
+
 
 
 #4 Test
