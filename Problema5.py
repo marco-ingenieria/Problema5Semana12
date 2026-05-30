@@ -125,8 +125,41 @@ def buscar_por_dni(archivo, indice_por_dni, dni):
 
 #MÓDULO 3
 #e
-def listar_pacientes_ordenados():
-   pass
+def listar_pacientes_ordenados(ruta, criterio):
+    """
+    Lee todos los pacientes del archivo binario y devuelve una lista ordenada según el criterio.
+
+    Precondición: es un string apuntando a un archivo binario existente y criterio una cadena de
+                    texto: apellido o prioridad.
+    Postcondición: Devuelve una lista ordenada de los pacietes segun el criterio. Si el criterio es apellido,
+                    se ordena alfabeticamente. Si el criterio es prioridad, se ordena por la prioridad osea
+                    del 1 a 3, y los que tengan la misma proridad se los ordena de forma alfabetica por
+                    el apellido.
+    """
+    pacientes = []
+
+    # Lectura y preparación de datos
+    with open(ruta, "rb") as f:
+        for paciente_pack in leer_archivo_pacientes(f):
+            paciente = desempaquetar_paciente(paciente_pack)
+            apellido = paciente[1]
+            prioridad = paciente[4]
+
+            if criterio == "apellido":
+                pacientes.append((apellido.lower(), paciente))
+            elif criterio == "prioridad":
+                pacientes.append((prioridad, apellido.lower(), paciente))
+            else:
+                pacientes.append((0, paciente))
+
+    lista_ordenada_pacientes = merge_sort(pacientes)
+
+    #Se desarma la estructura y se devuelven los datos de forma limpia
+    resultado = []
+    for par in lista_ordenada_pacientes:
+        resultado.append(par[-1])
+
+    return resultado
 
 def merge_sort(secuencia):
     """Ordena una secuencia comparándola por divide y vencerás.
