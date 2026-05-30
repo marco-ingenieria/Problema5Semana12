@@ -48,14 +48,59 @@ def buscar_por_dni(archivo, indice_por_dni, dni):
 #MÓDULO 3
 #e
 def listar_pacientes_ordenados():
-    pass
+   pass
 
-def merge_sort():
-    pass
+def merge_sort(secuencia):
+    """Ordena una secuencia comparándola por divide y vencerás.
+
+    Precondición: secuencia es una lista de elementos comparables entre sí.
+    Postcondición: devuelve una nueva lista con los mismos elementos en
+                   orden no decreciente; secuencia no se modifica.
+    Complejidad: O(n log n) en tiempo, O(n) en espacio auxiliar.
+    """
+    # --- Prólogo: caso base de la recursión -------------------------
+    if len(secuencia) <= 1:
+        return list(secuencia)
+
+    # --- Resolución: dividir, recurrir, combinar --------------------
+    medio = len(secuencia) >> 1
+    mitad_izq = merge_sort(secuencia[:medio])
+    mitad_der = merge_sort(secuencia[medio:])
+    resultado = _fusionar(mitad_izq, mitad_der)
+
+    # --- Epílogo: devolver la solución del problema -----------------
+    return resultado
+
+
+def _fusionar(izq, der):
+    """Fusiona dos listas ordenadas en una sola lista ordenada.
+
+    Precondición: izq y der están ordenadas en forma no decreciente.
+    Postcondición: devuelve una nueva lista con todos los elementos
+                   de izq y der, en orden no decreciente y estable.
+    """
+    # --- Prólogo: estructuras de trabajo ----------------------------
+    resultado = []
+    i, j = 0, 0
+    n_izq, n_der = len(izq), len(der)
+
+    # --- Resolución: avanzar ambos punteros tomando el menor --------
+    while i < n_izq and j < n_der:
+        if izq[i] <= der[j]:
+            resultado.append(izq[i])
+            i += 1
+        else:
+            resultado.append(der[j])
+            j += 1
+    resultado.extend(izq[i:])
+    resultado.extend(der[j:])
+
+    # --- Epílogo: devolver lista fusionada --------------------------
+    return resultado
 
 #f
 """
-Justificación: 
+Justificación:
 """
 
 
