@@ -1,8 +1,8 @@
 """
 SECCIÓN DECLARATIVA
 Descripción:
-    Sistema de gestión de pacientes que maneja persistencia en archivos binarios, 
-    búsquedas eficientes mediante índices (DNI/Apellido), ordenamiento estable 
+    Sistema de gestión de pacientes que maneja persistencia en archivos binarios,
+    búsquedas eficientes mediante índices (DNI/Apellido), ordenamiento estable
     (Merge Sort) por prioridad, y asignación óptima de turnos diarios usando Backtracking.
 
 Recursos:
@@ -359,7 +359,62 @@ Análisis: backtracking con poda vs. fuerza bruta
 
 prueba_asignar_agenda()
 
+#Test - modulo 3
+print("\nEvaluación - Módulo 3")
 
+# 1.Prólogo: Definir un archivo de prueba y datos desordenados
+RUTA_TEST = "pacientes_test.dat"
+
+datos_prueba = [
+    (40000000, "Pérez", "Juan", "11223344", 2),
+    (20000000, "Alvarez", "Anahí", "55667788", 1),
+    (30000000, "Gonzales", "María", "99001122", 1),
+    (10000000, "Blanco", "Carlos", "33445566", 3),
+    (50000000, "Alvarez", "Bruno", "44556677", 2)
+]
+
+print("Creando archivo de prueba")
+crear_archivo_pacientes(RUTA_TEST, datos_prueba)
+
+try:
+    #Evaluación del criterio apellido
+    print("\nEvaluando criterio apellido")
+
+    resultado_modulo_apellido = listar_pacientes_ordenados(RUTA_TEST, "apellido")
+
+    resultado_esperado_apellido = sorted(datos_prueba, key=lambda p: p[1].lower())
+
+    # Validación algorítmica
+    for i in range(len(resultado_modulo_apellido)):
+        assert resultado_modulo_apellido[i][0] == resultado_esperado_apellido[i][0]
+
+    print("El criterio 'apellido' coincide exactamente con sorted().")
+
+    # Evaluación del criterio prioridad
+    print("\nEvaluando criterio prioridad")
+
+    resultado_modulo_prioridad = listar_pacientes_ordenados(RUTA_TEST, "prioridad")
+
+    resultado_esperado_prioridad = sorted(
+        datos_prueba,
+        key=lambda p: (p[4], p[1].lower())
+    )
+
+    # Validación algorítmica
+    for i in range(len(resultado_modulo_prioridad)):
+        assert resultado_modulo_prioridad[i][0] == resultado_esperado_prioridad[i][0]
+    print("El criterio prioridad coincide exactamente con sorted().")
+    print("\nTodas las pruebas del modulo 3 pasaron correctamente.")
+
+except AssertionError:
+    #Si en algun punto no son iguales el sorted y el ordenamiento hecho entonces imprime esto
+    print("\nEl orden obtenido no es igual al de sorted().")
+
+finally:
+    # Limpieza del archivo temporal en el disco
+    if os.path.exists(RUTA_TEST):
+        os.remove(RUTA_TEST)
+        print("\nArchivo de prueba borrado con éxito.")
 
 #
 #SECCIÓN ALGORÍTMICA (Integración)
@@ -432,63 +487,3 @@ else:
 # Limpieza del archivo de pacientes de integración
 if os.path.exists(ruta_pacientes):
     os.remove(ruta_pacientes)
-
-
-
-#4 Test
-if __name__ == '__main__':
-    print("Evaluación - Módulo 3")
-
-    # 1.Prólogo: Definir un archivo de prueba y datos desordenados
-    RUTA_TEST = "pacientes_test.dat"
-
-    datos_prueba = [
-        (40000000, "Pérez", "Juan", "11223344", 2),
-        (20000000, "Alvarez", "Anahí", "55667788", 1),
-        (30000000, "Gonzales", "María", "99001122", 1),
-        (10000000, "Blanco", "Carlos", "33445566", 3),
-        (50000000, "Alvarez", "Bruno", "44556677", 2)
-    ]
-
-    print("Creando archivo de prueba")
-    crear_archivo_pacientes(RUTA_TEST, datos_prueba)
-
-    try:
-        #Evaluación del criterio apellido
-        print("\nEvaluando criterio apellido")
-
-        resultado_modulo_apellido = listar_pacientes_ordenados(RUTA_TEST, "apellido")
-
-        resultado_esperado_apellido = sorted(datos_prueba, key=lambda p: p[1].lower())
-
-        # Validación algorítmica
-        for i in range(len(resultado_modulo_apellido)):
-            assert resultado_modulo_apellido[i][0] == resultado_esperado_apellido[i][0]
-
-        print("El criterio 'apellido' coincide exactamente con sorted().")
-
-        # Evaluación del criterio prioridad
-        print("\nEvaluando criterio prioridad")
-
-        resultado_modulo_prioridad = listar_pacientes_ordenados(RUTA_TEST, "prioridad")
-
-        resultado_esperado_prioridad = sorted(
-            datos_prueba,
-            key=lambda p: (p[4], p[1].lower())
-        )
-
-        # Validación algorítmica
-        for i in range(len(resultado_modulo_prioridad)):
-            assert resultado_modulo_prioridad[i][0] == resultado_esperado_prioridad[i][0]
-        print("El criterio prioridad coincide exactamente con sorted().")
-        print("\nTodas las pruebas del modulo 3 pasaron correctamente.")
-
-    except AssertionError:
-        #Si en algun punto no son iguales el sorted y el ordenamiento hecho entonces imprime esto
-        print("\nEl orden obtenido no es igual al de sorted().")
-
-    finally:
-        # Limpieza del archivo temporal en el disco
-        if os.path.exists(RUTA_TEST):
-            os.remove(RUTA_TEST)
-            print("\nArchivo de prueba borrado con éxito.")
