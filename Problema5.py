@@ -1,7 +1,19 @@
 """
 SECCIÓN DECLARATIVA
 Descripción:
+    Sistema de gestión de pacientes que maneja persistencia en archivos binarios, 
+    búsquedas eficientes mediante índices (DNI/Apellido), ordenamiento estable 
+    (Merge Sort) por prioridad, y asignación óptima de turnos diarios usando Backtracking.
+
 Recursos:
+    - FORMATO / TAM_REGISTRO: Configuración de estructura binaria (`struct`).
+    - archivos .dat: Almacenamiento físico de los registros de pacientes.
+    - indice_por_dni / indice_por_apellido: Diccionarios de indexación en memoria.
+    - pacientes_del_dia / franjas / disponibilidad: Datos de entrada para la agenda.
+    - agenda_asignada: Diccionario resultante `{franja: dni}` con los turnos optimizados.
+    - Funciones: Bloques organizados en Módulos (1. E/S Binaria, 2. Indexación, 3. Merge Sort, 4. Backtracking).
+
+Integrantes del equipo: Elias Cantero, Marco Leanza, Ivan Nolasco, Muriel Soiffer
 """
 
 import struct
